@@ -8,7 +8,8 @@ import tech.getarrays.employeemanager.repo.EmployeeRepo;
 
 import javax.transaction.Transactional;
 import java.util.List;
-import java.util.UUID;
+import java.util.Optional;
+
 
 @Service
 @Transactional
@@ -20,9 +21,8 @@ public class EmployeeService {
         this.employeeRepo = employeeRepo;
     }
 
-    public Employee addEmployee(Employee employee) {
-
-        return employeeRepo.save(employee);
+    public Optional<List<Employee>> findAllEmployee(Long id) {
+        return employeeRepo.subOrdinates(id);
     }
 
     public List<Employee> findAllEmployees() {

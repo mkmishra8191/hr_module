@@ -1,6 +1,7 @@
 package tech.getarrays.employeemanager.resource;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -13,9 +14,11 @@ import tech.getarrays.employeemanager.model.Employee;
 import tech.getarrays.employeemanager.model.JwtResponse;
 import tech.getarrays.employeemanager.service.EmployeeService;
 import tech.getarrays.employeemanager.service.MyUserDetailsService;
+
 import tech.getarrays.employeemanager.util.JwtUtil;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 
@@ -35,6 +38,9 @@ public class EmployeeResource {
     @RequestMapping(value = "/authenticate", method = RequestMethod.POST )
 
     public ResponseEntity<?> createAuthenticationToken(@RequestBody AuthRequest authRequest) throws Exception{
+        final UserDetails userDetails = myUserDetailsService
+                .loadUserByUsername(authRequest.getUserName());
+
 
         try {
 
@@ -46,11 +52,16 @@ public class EmployeeResource {
         catch (BadCredentialsException e){
             throw new Exception ("Incorrect username or password", e);
         }
-        final UserDetails userDetails = myUserDetailsService
-                .loadUserByUsername(authRequest.getUserName());
+        HttpHeaders httpHeaders = new HttpHeaders();
+
+
 
         final String jwt = jwtTokenUtil.generateToken(userDetails);
-        return ResponseEntity.ok(new JwtResponse(jwt));
+        httpHeaders.set("jwt",jwt);
+
+      Optional <List<Employee>> myEmployees = employeeService.findAllEmployee(myUserDetailsService.idd);
+
+        return new ResponseEntity(httpHeaders, HttpStatus.OK);
     }
 
     @GetMapping("/all")
@@ -65,11 +76,6 @@ public class EmployeeResource {
         return new ResponseEntity<>(employee, HttpStatus.OK);
     }
 
-    @PostMapping("/add")
-    public ResponseEntity<Employee> addEmployee(@RequestBody Employee employee) {
-        Employee newEmployee = employeeService.addEmployee(employee);
-        return new ResponseEntity<>(newEmployee, HttpStatus.CREATED);
-    }
 
     @PutMapping("/update")
     public ResponseEntity<Employee> updateEmployee(@RequestBody Employee employee) {
