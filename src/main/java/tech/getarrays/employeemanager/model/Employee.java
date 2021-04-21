@@ -36,13 +36,10 @@ public class Employee implements Serializable {
     @JoinColumn(name = "ReportingTo")
     private Employee reportingTo;
     @OneToMany(mappedBy="reportingTo")
-    private Set<Employee> subordinates = new HashSet<>();
+    private Set<Employee> subordinates ;
 
 
 
-    public void setSubordinates(Set<Employee> subordinates) {
-        this.subordinates = subordinates;
-    }
 
 
 

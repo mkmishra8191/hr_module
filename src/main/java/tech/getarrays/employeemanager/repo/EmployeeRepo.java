@@ -13,9 +13,10 @@ public interface EmployeeRepo extends JpaRepository<Employee, Long> {
     void deleteEmployeeById(Long id);
 
     Optional<Employee> findEmployeeById(Long id);
-
     @Query("select u from Employee u where u.reportingTo = :id")
-    Optional<List<Employee>> subOrdinates(Long id);
+    List<Employee> findAllEmploy(Employee id);
+
+
 
     @Query("select u from Employee u where u.email = :userName")
     Employee getUserByUserName(@Param("userName") String userName);

@@ -21,8 +21,8 @@ public class EmployeeService {
         this.employeeRepo = employeeRepo;
     }
 
-    public Optional<List<Employee>> findAllEmployee(Long id) {
-        return employeeRepo.subOrdinates(id);
+    public List<Employee> findAllEmployeess(Employee id) {
+        return employeeRepo.findAllEmploy(id);
     }
 
     public List<Employee> findAllEmployees() {

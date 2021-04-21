@@ -30,6 +30,8 @@ public class EmployeeResource {
    private MyUserDetailsService myUserDetailsService;
    @Autowired
    private JwtUtil jwtTokenUtil;
+    private Employee Employee;
+
 
     public EmployeeResource(EmployeeService employeeService) {
         this.employeeService = employeeService;
@@ -40,6 +42,7 @@ public class EmployeeResource {
     public ResponseEntity<?> createAuthenticationToken(@RequestBody AuthRequest authRequest) throws Exception{
         final UserDetails userDetails = myUserDetailsService
                 .loadUserByUsername(authRequest.getUserName());
+
 
 
         try {
@@ -59,9 +62,9 @@ public class EmployeeResource {
         final String jwt = jwtTokenUtil.generateToken(userDetails);
         httpHeaders.set("jwt",jwt);
 
-      Optional <List<Employee>> myEmployees = employeeService.findAllEmployee(myUserDetailsService.idd);
+      List<Employee> myEmployees = employeeService.findAllEmployeess(MyUserDetailsService.userr);
 
-        return new ResponseEntity(httpHeaders, HttpStatus.OK);
+        return new ResponseEntity(myEmployees,httpHeaders, HttpStatus.OK);
     }
 
     @GetMapping("/all")

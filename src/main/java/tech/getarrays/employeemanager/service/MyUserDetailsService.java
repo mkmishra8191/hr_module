@@ -18,11 +18,13 @@ public class MyUserDetailsService implements UserDetailsService {
 
     @Autowired
     private  EmployeeRepo employeeRepo;
-    public static Long idd;
+    public static  Long  idd;
+    public static Employee userr;
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Employee user = this.employeeRepo.getUserByUserName(username);
-         this.idd = user.getId();
+         this.userr = user;
+         System.out.println(idd);
         if (user==null){
 
             throw  new UsernameNotFoundException("can not find user");
