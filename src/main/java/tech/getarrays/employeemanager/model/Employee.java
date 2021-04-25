@@ -4,15 +4,14 @@ package tech.getarrays.employeemanager.model;
 
 
 
-import org.springframework.beans.factory.annotation.Autowired;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.time.Month;
 import java.time.Period;
-import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Entity
 @Table(name = "employee", indexes = @Index(columnList = "id"))
@@ -46,6 +45,7 @@ public class Employee implements Serializable {
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinTable(name = "user_roles",joinColumns = {@JoinColumn(name="id")},inverseJoinColumns = {@JoinColumn(name="role_id")})
     private  Set<Role> roles;
+
     private  boolean enabled;
 
     public LocalDate joiningDate;
@@ -62,7 +62,7 @@ public class Employee implements Serializable {
     }
 
 
-
+    @JsonIgnore
     private String password;
     private String skill;
 
@@ -168,7 +168,15 @@ public Long getId(){
     public void setPassword(String password) {
         this.password = password;
     }
+    private String getRoles(Set<Role> roles){
 
+        final String[] rolle = {""};
+
+        roles.forEach(role->{ rolle[0] +=  role.getName();});
+
+        return rolle[0];
+
+    }
 
     public LocalDate getJoiningDate() {
         return LocalDate.now();
@@ -184,9 +192,9 @@ public Long getId(){
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", email='" + email + '\'' +
-                ", jobTitle='" + department + '\'' +
-                ", phone='" + phone + '\'' +
-                ", imageUrl='" + designation + '\'' +
+                ", roles='" + getRoles(roles)+ '\'' +
+
+
                 '}';
     }
 }

@@ -20,11 +20,18 @@ public class MyUserDetailsService implements UserDetailsService {
     private  EmployeeRepo employeeRepo;
     public static  Long  idd;
     public static Employee userr;
+
+    public static boolean manager;
+    public static boolean hr;
+    public static boolean use;
+    public static Set authorities = new HashSet<>();
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Employee user = this.employeeRepo.getUserByUserName(username);
-         this.userr = user;
+         userr = user;
          System.out.println(idd);
+
         if (user==null){
 
             throw  new UsernameNotFoundException("can not find user");
@@ -34,9 +41,19 @@ public class MyUserDetailsService implements UserDetailsService {
 
         return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), getAuthority(user));
     }
-    private Set getAuthority(Employee user) {
-        Set authorities = new HashSet<>();
+    public Set getAuthority(Employee user) {
+
         user.getRoles().forEach(role -> {
+
+            if (role.getName().equals("MANAGER")){
+                manager = true;
+            } else if(role.getName().equals("HR")){
+
+                hr=true;
+            } else if(role.getName().equals("USER")){
+
+                use = true;
+            }
             authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getName()));
         });
         return authorities;

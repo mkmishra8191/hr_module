@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import tech.getarrays.employeemanager.model.AuthRequest;
@@ -17,8 +18,7 @@ import tech.getarrays.employeemanager.service.MyUserDetailsService;
 
 import tech.getarrays.employeemanager.util.JwtUtil;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 
@@ -39,44 +39,74 @@ public class EmployeeResource {
 
     @RequestMapping(value = "/authenticate", method = RequestMethod.POST )
 
-    public ResponseEntity<?> createAuthenticationToken(@RequestBody AuthRequest authRequest) throws Exception{
+    public ResponseEntity<?> createAuthenticationToken(@RequestBody AuthRequest authRequest) throws Exception {
         final UserDetails userDetails = myUserDetailsService
                 .loadUserByUsername(authRequest.getUserName());
-
 
 
         try {
 
 
-        authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(authRequest.getUserName(),authRequest.getPassword())
-    );
-        }
-        catch (BadCredentialsException e){
-            throw new Exception ("Incorrect username or password", e);
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(authRequest.getUserName(), authRequest.getPassword())
+            );
+        } catch (BadCredentialsException e) {
+            throw new Exception("Incorrect username or password", e);
         }
         HttpHeaders httpHeaders = new HttpHeaders();
 
 
-
         final String jwt = jwtTokenUtil.generateToken(userDetails);
-        httpHeaders.set("jwt",jwt);
+        httpHeaders.set("jwt", jwt);
 
-      List<Employee> myEmployees = employeeService.findAllEmployeess(MyUserDetailsService.userr);
 
-        return new ResponseEntity(myEmployees,httpHeaders, HttpStatus.OK);
+
+       List<Employee> myEmployees = null;
+
+        if(MyUserDetailsService.manager) {
+           MyUserDetailsService.manager = false;
+
+            myEmployees = employeeService.findAllEmployeess(MyUserDetailsService.userr);
+
+
+            return new ResponseEntity(myEmployees.toString(), httpHeaders, HttpStatus.OK);
+        } else if(MyUserDetailsService.hr){
+
+            MyUserDetailsService.hr = false;
+
+            myEmployees = employeeService.findAllEmployees();
+            myEmployees.remove(MyUserDetailsService.userr);
+
+            return new ResponseEntity(myEmployees.toString(), httpHeaders, HttpStatus.OK);
+
+
+        } else if(MyUserDetailsService.use) {
+
+            MyUserDetailsService.use = false;
+
+
+               return new ResponseEntity(MyUserDetailsService.userr.toString(), httpHeaders, HttpStatus.OK);
+           } else
+
+               return new ResponseEntity(httpHeaders, HttpStatus.OK);
+
     }
 
     @GetMapping("/all")
      public ResponseEntity<List<Employee>> getAllEmployees () {
         List<Employee> employees = employeeService.findAllEmployees();
-        return new ResponseEntity<>(employees, HttpStatus.OK);
+        return new ResponseEntity(employees.toString(), HttpStatus.OK);
+    }
+    @GetMapping("/subordinate/{id}")
+    public ResponseEntity<List<Employee>> getAllSubordinates (@PathVariable("id") Long id) {
+        List<Employee> employees = employeeService.findAllEmployeess(employeeService.findEmployeeById(id));
+        return new ResponseEntity(employees.toString(), HttpStatus.OK);
     }
 
     @GetMapping("/find/{id}")
     public ResponseEntity<Employee> getEmployeeById (@PathVariable("id") Long id) {
         Employee employee = employeeService.findEmployeeById(id);
-        return new ResponseEntity<>(employee, HttpStatus.OK);
+        return new ResponseEntity(employee.toString(), HttpStatus.OK);
     }
 
 
