@@ -47,7 +47,14 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         }
         filterChain.doFilter(request, response);
     }
+
+    public String getUser(HttpServletRequest request) {
+               String   jwt= request.getHeader("authorization").substring(7);
+     return    jwtUtil.extractUsername(jwt);
+
+    }
 }
+
 
 
 

@@ -11,7 +11,7 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
+
 
 @Entity
 @Table(name = "employee", indexes = @Index(columnList = "id"))
@@ -24,7 +24,19 @@ public class Employee implements Serializable {
 
     @Column(unique = true)
     private String email;
-    private String department;
+
+    public Department getDepartment() {
+        return department;
+    }
+
+    public void setDepartment(Department department) {
+        this.department = department;
+    }
+
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinTable(name = "employee_department",joinColumns = {@JoinColumn(name="id")},inverseJoinColumns = {@JoinColumn(name="department_id")})
+
+    private  Department department;
 
 
     private String phone;
@@ -43,7 +55,9 @@ public class Employee implements Serializable {
 
 
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+
     @JoinTable(name = "user_roles",joinColumns = {@JoinColumn(name="id")},inverseJoinColumns = {@JoinColumn(name="role_id")})
+
     private  Set<Role> roles;
 
     private  boolean enabled;
@@ -52,7 +66,7 @@ public class Employee implements Serializable {
 
     public LocalDate getIncrementDate() {
 
-        LocalDate temp = getJoiningDate();
+        LocalDate temp = LocalDate.now();
         int monthDiff = Period.between(temp, LocalDate.now()).getMonths();
         int monthAdd = (monthDiff / 12) * 12 + 12;
 
@@ -69,16 +83,17 @@ public class Employee implements Serializable {
     public Employee() {}
 
 
-    public Employee(String name, String email,LocalDate joiningDate, String password, String department, String phone, String designation, String skill) {
+    public Employee(String name, String email,LocalDate joiningDate, String password,String phone, String designation, String skill) {
         this.joiningDate = joiningDate;
 
         this.password = password;
         this.name = name;
         this.email = email;
-        this.department = department;
+
         this.phone = phone;
         this.designation = designation;
         this.skill = skill;
+
     }
     public Employee getReportingTo() {
         return reportingTo;
@@ -122,13 +137,6 @@ public Long getId(){
         this.email = email;
     }
 
-    public String getDepartment() {
-        return department;
-    }
-
-    public void setDepartment(String department) {
-        this.department = department;
-    }
 
     public String getPhone() {
         return phone;
@@ -178,8 +186,8 @@ public Long getId(){
 
     }
 
-    public LocalDate getJoiningDate() {
-        return LocalDate.now();
+    public String getJoiningDate() {
+        return LocalDate.now().toString();
     }
 
     public void setJoiningDate(LocalDate joiningDate) {
@@ -192,7 +200,7 @@ public Long getId(){
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", email='" + email + '\'' +
-                ", roles='" + getRoles(roles)+ '\'' +
+
 
 
                 '}';

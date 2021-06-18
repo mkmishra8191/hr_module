@@ -5,6 +5,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import tech.getarrays.employeemanager.service.MyUserDetailsService;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -38,6 +39,7 @@ public class JwtUtil {
 
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
+        claims.put("roles", MyUserDetailsService.authorities);
         return createToken(claims, userDetails.getUsername());
     }
 

@@ -1,6 +1,8 @@
 package tech.getarrays.employeemanager.model;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 
 @Entity
@@ -13,6 +15,7 @@ public class Leaves {
         this.sl = sl;
     }
 
+
     public Leaves() {
     }
 
@@ -20,14 +23,46 @@ public class Leaves {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
+
+
     private double cl;
 
+
+    private double takencl;
+
+
     private double pl;
-
+    private double takenpl;
     private double sl;
+    private double takensl;
+
+
+    @JsonIgnore
+    @ManyToOne()
+    @JoinColumn(name = "employeeProfile")
+    public Employee emplyeeProfile;
+
+    public EmpInfo getEmpInfo() {
+        return empInfo;
+    }
+
+    public void setEmpInfo(EmpInfo empInfo) {
+        this.empInfo = empInfo;
+    }
+
+    @Transient
+    public EmpInfo  empInfo;
 
 
 
+
+    public Employee getEmplyeeProfile() {
+        return emplyeeProfile;
+    }
+
+    public void setEmplyeeProfile(Employee emplyeeProfile) {
+        this.emplyeeProfile = emplyeeProfile;
+    }
 
 
     public long getId() {
@@ -61,4 +96,28 @@ public class Leaves {
     public void setSl(int sl) {
         this.sl = sl;
     }
+    public double getTakencl() {
+        return takencl;
+    }
+
+    public void setTakencl(double takencl) {
+        this.takencl = takencl;
+    }
+
+    public double getTakenpl() {
+        return takenpl;
+    }
+
+    public void setTakenpl(double takenpl) {
+        this.takenpl = takenpl;
+    }
+
+    public double getTakensl() {
+        return takensl;
+    }
+
+    public void setTakensl(double takensl) {
+        this.takensl = takensl;
+    }
+
 }
