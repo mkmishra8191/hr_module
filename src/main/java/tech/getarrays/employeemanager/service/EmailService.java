@@ -74,7 +74,7 @@ public class EmailService implements Serializable {
         Session session=Session.getInstance(properties, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication("manjeet.eng8191@gmail.com", "Jan@2021");
+                return new PasswordAuthentication("manjeet.eng8191@gmail.com", "****");
             }
 
 
