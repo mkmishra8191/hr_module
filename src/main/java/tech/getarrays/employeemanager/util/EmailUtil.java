@@ -57,7 +57,7 @@ public class EmailUtil {
         }
         return mimeMultipart;
     }
-    public MimeMultipart sendNewJoinee(Employee employee) {
+    public MimeMultipart sendRequest(Employee employee) {
         MimeMultipart mimeMultipart = new MimeMultipart();
 
         ByteArrayOutputStream outputStream = null;
@@ -70,7 +70,7 @@ public class EmailUtil {
 
             //construct the pdf body part
 
-            textBodyPart.setText(employee.getName()+"has applied for Leaves");
+            textBodyPart.setText(employee.getName()+" has applied for Leaves");
 
             //construct the mime multi part
 

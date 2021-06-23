@@ -11,6 +11,7 @@ public class EmpInfo {
     private String Designation;
 
 
+
     public Department getDepartment() {
         return department;
     }

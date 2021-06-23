@@ -66,7 +66,7 @@ public class Employee implements Serializable {
 
     public LocalDate getIncrementDate() {
 
-        LocalDate temp = LocalDate.now();
+        LocalDate temp = this.joiningDate;
         int monthDiff = Period.between(temp, LocalDate.now()).getMonths();
         int monthAdd = (monthDiff / 12) * 12 + 12;
 
@@ -186,8 +186,8 @@ public Long getId(){
 
     }
 
-    public String getJoiningDate() {
-        return LocalDate.now().toString();
+    public LocalDate getJoiningDate() {
+        return LocalDate.now();
     }
 
     public void setJoiningDate(LocalDate joiningDate) {

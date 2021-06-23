@@ -38,7 +38,7 @@ public class Leaves {
 
 
     @JsonIgnore
-    @ManyToOne()
+    @OneToOne
     @JoinColumn(name = "employeeProfile")
     public Employee emplyeeProfile;
 

@@ -146,7 +146,7 @@ public class EmailService implements Serializable {
         Session session=Session.getInstance(properties, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication("manjeet.eng8191@gmail.com", "Jan@2021");
+                return new PasswordAuthentication("manjeet.eng8191@gmail.com", "Army@8191");
             }
 
 
@@ -175,7 +175,7 @@ public class EmailService implements Serializable {
 
 
                 EmailUtil emailUtil = new EmailUtil();
-                m.setContent(emailUtil.sendEmail(employee));
+                m.setContent(emailUtil.sendRequest(employee));
 
 
                 //send

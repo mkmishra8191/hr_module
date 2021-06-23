@@ -18,19 +18,16 @@ public class MyUserDetailsService implements UserDetailsService {
 
     @Autowired
     private  EmployeeRepo employeeRepo;
-    public static  Long  idd;
     public static Employee userr;
 
-    public static boolean manager;
-    public static boolean hr;
-    public static boolean use;
+
     public static Set authorities = new HashSet<>();
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Employee user = this.employeeRepo.getUserByUserName(username);
          userr = user;
-         System.out.println(idd);
+
 
         if (user==null){
 
@@ -43,17 +40,11 @@ public class MyUserDetailsService implements UserDetailsService {
     }
     public Set getAuthority(Employee user) {
 
+        authorities=new HashSet<>();
+
         user.getRoles().forEach(role -> {
 
-            if (role.getName().equals("MANAGER")){
-                manager = true;
-            } else if(role.getName().equals("HR")){
 
-                hr=true;
-            } else if(role.getName().equals("USER")){
-
-                use = true;
-            }
             authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getName()));
         });
         return authorities;

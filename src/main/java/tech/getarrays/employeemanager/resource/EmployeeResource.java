@@ -13,9 +13,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import tech.getarrays.employeemanager.filters.JwtRequestFilter;
 import tech.getarrays.employeemanager.model.*;
-import tech.getarrays.employeemanager.repo.DepartmentRepo;
-import tech.getarrays.employeemanager.repo.LeaveRapo;
-import tech.getarrays.employeemanager.repo.LeavesRapo;
+import tech.getarrays.employeemanager.repo.*;
 import tech.getarrays.employeemanager.service.EmailService;
 import tech.getarrays.employeemanager.service.EmployeeService;
 import tech.getarrays.employeemanager.service.MyUserDetailsService;
@@ -38,6 +36,8 @@ public class EmployeeResource {
     private  final LeaveRapo leaveRapo;
     private  final LeavesRapo leavesRapo;
     private final EmailService emailService;
+    private  final EmployeeRepo employeeRepo;
+    private final ExitRequestRepo exitRequestRepo;
 
    @Autowired
    private AuthenticationManager authenticationManager;
@@ -52,13 +52,15 @@ public class EmployeeResource {
 
 
 
-    public EmployeeResource(DepartmentRepo departmentRepo, EmployeeService employeeService, LeaveRapo leaveRapo, LeavesRapo leavesRapo, EmailService emailService) {
+    public EmployeeResource(DepartmentRepo departmentRepo, EmployeeService employeeService, LeaveRapo leaveRapo, LeavesRapo leavesRapo, EmailService emailService, EmployeeRepo employeeRepo, ExitRequestRepo exitRequestRepo) {
         this.departmentRepo = departmentRepo;
         this.employeeService = employeeService;
         this.leaveRapo = leaveRapo;
 
         this.leavesRapo = leavesRapo;
         this.emailService = emailService;
+        this.employeeRepo = employeeRepo;
+        this.exitRequestRepo = exitRequestRepo;
     }
     @CrossOrigin
     @RequestMapping(value = "/login", method = RequestMethod.POST )
@@ -77,41 +79,15 @@ public class EmployeeResource {
         } catch (BadCredentialsException e) {
             throw new Exception("Incorrect username or password", e);
         }
-        HttpHeaders httpHeaders = new HttpHeaders();
+
 
 
         final String jwt = jwtTokenUtil.generateToken(userDetails);
         LoginResponse loginResponse = new LoginResponse(jwt,"Bearer",MyUserDetailsService.authorities.toString());
-        httpHeaders.set("jwt", jwt);
 
 
 
-       List<Employee> myEmployees = null;
 
-        if(MyUserDetailsService.manager) {
-           MyUserDetailsService.manager = false;
-
-            myEmployees = employeeService.findAllEmployeess(MyUserDetailsService.userr);
-
-
-            return new ResponseEntity(myEmployees.toString(), httpHeaders, HttpStatus.OK);
-        } else if(MyUserDetailsService.hr){
-
-            MyUserDetailsService.hr = false;
-
-            myEmployees = employeeService.findAllEmployees();
-            myEmployees.remove(MyUserDetailsService.userr);
-
-            return new ResponseEntity(myEmployees.toString(), httpHeaders, HttpStatus.OK);
-
-
-        } else if(MyUserDetailsService.use) {
-
-            MyUserDetailsService.use = false;
-
-
-               return new ResponseEntity(loginResponse,HttpStatus.OK);
-           } else
 
             return new ResponseEntity(loginResponse, HttpStatus.OK);
 
@@ -121,9 +97,40 @@ public class EmployeeResource {
         List<Information> information=employeeService.findAllDepartment();
         return new ResponseEntity<>(information, HttpStatus.OK);
     }
-    @RequestMapping(value = "/employeesinformation/{id}",method = RequestMethod.GET) public ResponseEntity <List<EmpInfo >> getEmployeesInfo (@PathVariable("id") long id) throws IOException {
+    @RequestMapping(value = "/employeesinformation/{id}",method = RequestMethod.GET)
+    public ResponseEntity <List<EmpInfo >> getEmployeesInfo (@PathVariable("id") long id) throws IOException {
         List<EmpInfo> information=employeeService.findAllEmployeesInfo(employeeService.findDepartmentById(id));
         return new ResponseEntity<>(information, HttpStatus.OK);
+    }
+    @RequestMapping(value = "/allemployeesinformation",method = RequestMethod.GET)
+    public ResponseEntity <List<EmpInfo >> getallEmployeesInfo () throws IOException {
+        List<EmpInfo> information=employeeService.findAllEmployeesInfo();
+        return new ResponseEntity<>(information, HttpStatus.OK);
+    }
+    @RequestMapping(value = "/employeesinformations/{skill}",method = RequestMethod.GET)
+    public ResponseEntity <List<EmpInfo >> getEmployeesInfo (@PathVariable("skill") String skill) throws IOException {
+        List<EmpInfo> information=employeeService.getEmployeesInformations(skill);
+        return new ResponseEntity<>(information, HttpStatus.OK);
+    }
+    @RequestMapping(value = "/newjoineeinformation",method = RequestMethod.GET)
+    public ResponseEntity <List<NewJoinee >> getNewJoinee () throws IOException {
+        List<NewJoinee> information=employeeService.getNewJoineeInfo();
+        return new ResponseEntity(information, HttpStatus.OK);
+    }
+    @RequestMapping(value = "/getemployees",method = RequestMethod.GET)
+    public ResponseEntity <List<EmpInfo >> gettEmployees () throws IOException {
+        List<EmpInfo> information=employeeService.getEmployeesInfo(MyUserDetailsService.userr);
+        return new ResponseEntity<>(information, HttpStatus.OK);
+    }
+    @RequestMapping(value = "/exit",method = RequestMethod.GET)
+    public ResponseEntity <List<NewJoinee>> gettExit () throws IOException {
+        List<NewJoinee> information=employeeService.getExit();
+        return new ResponseEntity(information, HttpStatus.OK);
+    }
+    @RequestMapping(value = "/exits",method = RequestMethod.GET)
+    public ResponseEntity <List<ExitRequests>> gettExits () throws IOException {
+        List<ExitRequests> information= employeeService.getExits();
+        return new ResponseEntity(information, HttpStatus.OK);
     }
     @RequestMapping(value = "/department",method = RequestMethod.GET)
      public ResponseEntity  getAllDepartment () {
@@ -146,6 +153,8 @@ public class EmployeeResource {
         Employee newEmlpoyee = employeeService.saveEmployees(employee);
         return new ResponseEntity<>(newEmlpoyee, HttpStatus.CREATED);
     }
+
+
     @RequestMapping(value = "/leave", method = RequestMethod.POST )
 
     public ResponseEntity<AppliedLeave> addEmployee(@RequestBody RequestLeave requestLeave) {
@@ -155,7 +164,7 @@ public class EmployeeResource {
         appliedLeave.setLeaveType(requestLeave.getTypee());
         appliedLeave.setFromDate(requestLeave.getFromDate());
         appliedLeave.setToDate(requestLeave.getToDate());
-        appliedLeave.setReason("Waiting");
+        appliedLeave.setReportingManagerStatus("Waiting");
         appliedLeave.setEmployeeName(MyUserDetailsService.userr.getName());
 
         AppliedLeave leave = employeeService.applyLeavep(appliedLeave);
@@ -179,6 +188,21 @@ public class EmployeeResource {
         }
         return new ResponseEntity<>(leave, HttpStatus.CREATED);
     }
+    @GetMapping("/appliedleaves/{id}")
+    public  ResponseEntity<List<AppliedLeave>> getLeavesdetails(@PathVariable("id") Long id){
+        List<AppliedLeave> leaves = leaveRapo.findApplyLeaves(employeeRepo.findEmployeeById(id));
+
+        return new ResponseEntity<>(leaves, HttpStatus.OK);
+
+    }
+    @RequestMapping(value = "/approveleave", method = RequestMethod.POST )
+    public  ResponseEntity<AppliedLeave> approveLeave(@RequestBody ApproveLeaveRequest approveLeaveRequest){
+        leaveRapo.updateLeavescl(approveLeaveRequest.getReportingManagerStatus(),approveLeaveRequest.getId());
+        Optional<AppliedLeave> appliedLeave = leaveRapo.findLeavesById(approveLeaveRequest.getId());
+        return new ResponseEntity(appliedLeave, HttpStatus.OK);
+
+    }
+
 
     @GetMapping("/leaves")
    public  ResponseEntity<List<Leaves>> getLeavesdetails(){
@@ -189,8 +213,7 @@ public class EmployeeResource {
    }
     @GetMapping("/user")
     public  ResponseEntity<Leaves> getLeavedetails(HttpServletRequest request){
-        final UserDetails userDetails = myUserDetailsService
-                .loadUserByUsername(jwtRequestFilter.getUser(request));
+
         EmpInfo info=employeeService.getUser(MyUserDetailsService.userr);
 
        Leaves leaves = leavesRapo.findEmploy(MyUserDetailsService.userr);
